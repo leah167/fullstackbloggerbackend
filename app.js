@@ -8,17 +8,22 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 
 var app = express();
+
 var { mongoConnect } = require("./mongo.js");
 mongoConnect();
-//enable cors
+
+var blogsRouter = require("./routes/blogs");
+
 const cors = require("cors");
+
 app.use(
   cors({
     origin: "http://localhost:3000",
   })
 );
-// app.options("*", cors());
-var blogsRouter = require("./routes/blogs");
+
+app.options("*", cors());
+
 app.use("/blogs", blogsRouter);
 
 // view engine setup
