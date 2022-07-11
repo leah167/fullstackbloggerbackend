@@ -3,18 +3,15 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
+const cors = require("cors");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
-
-var app = express();
-
-var { mongoConnect } = require("./mongo.js");
-mongoConnect();
-
 var blogsRouter = require("./routes/blogs");
 
-const cors = require("cors");
+var app = express();
+var { mongoConnect } = require("./mongo.js");
+mongoConnect();
 
 app.use(
   cors({
@@ -22,9 +19,7 @@ app.use(
   })
 );
 
-app.options("*", cors());
-
-app.use("/blogs", blogsRouter);
+// app.options("*", cors());
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -38,6 +33,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/blogs", blogsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
