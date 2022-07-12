@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { blogsDB } = require("../mongo");
+const { serverCheckBlogIsValid } = require("../utils/validation");
 
 router.get("/hello-blogs", (req, res, next) => {
   res.json({ message: "Hello from express" });
@@ -38,6 +39,16 @@ router.get("/all-blogs", async function (req, res, next) {
 
 router.post("/blog-submit", async (req, res, next) => {
   try {
+    const blogIsValid = serverCheckBlogIsValid(req.body);
+
+    if (!blogIsValid) {
+      res.status(400).json({
+        message:
+          "You must include Title, Author, Category, and Text before submitting blog.",
+        success: false,
+      });
+      return;
+    }
     const collection = await blogsDB().collection("blogs50");
     const sortedBlogArray = await collection.find({}).sort({ id: 1 }).toArray();
     const lastBlog = sortedBlogArray[sortedBlogArray.length - 1];
@@ -57,9 +68,11 @@ router.post("/blog-submit", async (req, res, next) => {
     };
 
     await collection.insertOne(blogPost);
-    res.status(200).send("Submitted Post");
+    res.status(200).json({ message: "Post has been submitted", success: true });
   } catch (e) {
-    res.status(500).send("Error submitting post." + e);
+    res
+      .status(500)
+      .json({ message: "Error posting blog." + e, success: false });
   }
 });
 
