@@ -8,6 +8,7 @@ const cors = require("cors");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var blogsRouter = require("./routes/blogs");
+var adminRouter = require("./routes/admin");
 
 var app = express();
 var { mongoConnect } = require("./mongo.js");
@@ -15,11 +16,9 @@ mongoConnect();
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "*",
   })
 );
-
-// app.options("*", cors());
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -34,6 +33,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/blogs", blogsRouter);
+app.use("/admin", adminRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -45,10 +45,8 @@ app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
-
   // render the error page
   res.status(err.status || 500);
   res.render("error");
 });
-
 module.exports = app;
