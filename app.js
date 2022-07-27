@@ -4,6 +4,7 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const cors = require("cors");
+var { mongoConnect } = require("./mongo.js");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -11,7 +12,7 @@ var blogsRouter = require("./routes/blogs");
 var adminRouter = require("./routes/admin");
 
 var app = express();
-var { mongoConnect } = require("./mongo.js");
+
 mongoConnect();
 
 app.use(

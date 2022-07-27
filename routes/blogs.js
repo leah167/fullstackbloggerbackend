@@ -7,7 +7,7 @@ router.get("/hello-blogs", (req, res, next) => {
   res.json({ message: "Hello from express" });
 });
 
-router.get("/all-blogs", async function (req, res, next) {
+router.get("/all-blogs", async (req, res) => {
   try {
     const collection = await blogsDB().collection("blogs50");
     const limit = Number(req.query.limit);
@@ -34,6 +34,17 @@ router.get("/all-blogs", async function (req, res, next) {
     res.json({ message: posts });
   } catch (e) {
     res.status(500).send("Error fetching posts." + e);
+  }
+});
+
+router.get("/single-blog/:blogId", async (req, res) => {
+  try {
+    const blogId = Number(req.params.blogId);
+    const collection = await blogsDB().collection("blogs50");
+    const blogPost = await collection.findOne({ id: blogId });
+    res.status(200).json({ message: blogPost, success: true });
+  } catch (error) {
+    res.status(500).json({ message: "Error", success: false });
   }
 });
 

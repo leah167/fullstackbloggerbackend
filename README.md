@@ -158,3 +158,79 @@ Part 2:
 - Super Stretch Goal:
   - elemMatch may be able to do a partial string match
   - https://www.mongodb.com/docs/manual/reference/operator/query/elemMatch/
+
+### Requirements (Fullstack Part 3.1 - Blog Post Manager - Server)
+
+- Implement the following Server-Side:
+  - Create a new route file ./routes/admin.js
+    - Add these lines to the top of the file:
+      - var express = require("express");
+        var router = express.Router();
+        const { blogsDB } = require("../mongo");
+    - Add this line to the bottom of the file:
+      - module.exports = router
+  - Add the new route to express in ./app.js
+    - var adminRouter = require('./routes/admin');
+    - app.use('/admin', adminRouter);
+  - Implement three new admin routes in ./routes/admin.js
+    - GET "/admin/blog-list"
+      - This route should respond with an array of blog posts, but only with the following fields: [id, title, author, createdAt, lastModified].
+        - res.json(adminBlogList)
+      - Hint: The mongodb method .project({}) can be chained onto a .find({}) to retrieve only the specified fields from the database.
+      - Note: The idea here is to leave out fields the administrator does not need to see, such as text, in order to reduce the amount of data sent between the client and the server.
+    - PUT "/admin/edit-blog"
+      - This route should receive a post body (req.body) with the following shape:
+        - req.body = {
+          blogId: {number},
+          title: {string},
+          author: {string},
+          text: {string}
+          }
+      - Implement mongodb functionality to find a post by blogId and then update that post in the database with the new values from req.body.
+        - try {
+          const collection = await blogsDB().collection("posts")
+          const updatedPost = {
+          ...newPostData // This is where the new data from req.body will go
+          }
+          await collection.updateOne({
+          id: blogId
+          },{
+          $set:{
+          ...updatedPost
+          }
+          })
+          res.json({success: true})
+          } catch (e) {
+          console.error(e)
+          res.json({success: false})
+          }
+      - Note: The field lastModified should be set to the current date when you update the blog post.
+    - DELETE "/admin/delete-blog/:blogId"
+      - This route should get the blogId to delete from the req.params
+      - Implement mongodb functionality to find a blog post by blogId and delete it
+        - try {
+          const collection = await blogsDB().collection("posts")
+          await collection.deleteOne({
+          id: blogId
+          })  
+           res.json({success: true})
+          } catch (e) {
+          console.error(e)
+          res.json({success: false})
+          }
+  - Note: Eventually, we will be protecting certain functionality, such as editing or deleting a blog, by only allowing privileged admin users to access it.
+
+### Requirements (Fullstack Part 3.3 - Blog Post Manager - Modal)
+
+- Note: Our approach for this part of the Fullstack blogger is to implement the ability for an admin to edit blogs along with deleting them. We will add a new component called a Modal to our app. Then we will add a button to the <BlogManagerCard /> to open the Modal and at the same time, fetch blog data for a single blog for the Modal. We will then implement functionality to edit a single blog post in our Modal and send that updated blog data back to the server to be saved in the database.
+
+- Implement the following Server-Side:
+
+  - Add a new route GET "/blogs/single-blog/:blogId
+    - This route should receive a blogId as a urlParam and respond with the blog post whose id === blogId
+      - const blogId = Number(req.params.blogId);
+        const collection = await blogsDB().collection("posts")
+        const blogPost = await collection.findOne({id: blogId})
+        res.json(blogPost)
+
+- Note: At this point, CRUD (Create, Read, Update, and Delete) functionality should all be implemented in the Blogger application. You should be able to create new blog posts, view the new blog posts on the home page, update the blog posts using the blog-manager page Modal, and then delete a blog post in the blog-manager page. Test all this functionality to make sure that everything is working as it should.
